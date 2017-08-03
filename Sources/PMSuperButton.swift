@@ -255,7 +255,7 @@ open class PMSuperButton: UIButton {
     
     open func hideLoader(){
         
-        if let loaderViewContainer = self.loaderViewContainer, self.subviews.contains(loaderViewContainer) == false{
+        if loaderViewContainer == nil || !self.subviews.contains(loaderViewContainer!){
             return
         }
 
