@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import IKSpinner
 
 @IBDesignable
 open class PMSuperButton: UIButton {
@@ -69,6 +70,8 @@ open class PMSuperButton: UIButton {
             setupGradient()
         }
     }
+    
+    
     var gradient: CAGradientLayer?
     
     func setupGradient(){
@@ -88,6 +91,7 @@ open class PMSuperButton: UIButton {
         }
         self.layer.insertSublayer(gradient!, below: self.imageView?.layer)
     }
+    
     
     //MARK: - Animations
     @IBInspectable open var animatedScaleWhenHighlighted: CGFloat = 1.0
@@ -184,40 +188,108 @@ open class PMSuperButton: UIButton {
     }
     
     //MARK: - Loading
-    let indicator: UIActivityIndicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.gray)
+    private var loaderViewContainer: UIView!
+    open var loaderView: UIView = IKSpinner(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
     
     /**
      Show a loader inside the button, and enable or disable user interection while loading
      */
     open func showLoader(userInteraction: Bool = true){
-        guard self.subviews.contains(indicator) == false else {
-            return
-        }
-        self.isUserInteractionEnabled = userInteraction
-        indicator.isUserInteractionEnabled = false
-        indicator.center = CGPoint(x: self.bounds.size.width/2, y: self.bounds.size.height/2)
-        UIView.transition(with: self, duration: 0.5, options: .curveEaseOut, animations: {
-            self.titleLabel?.alpha = 0.0
-            self.imageAlpha = 0.0
-        }) { (finished) in
-            self.addSubview(self.indicator)
-            self.indicator.startAnimating()
-        }
-    }
-    
-    open func hideLoader(){
-        guard self.subviews.contains(indicator) == true else {
+        
+        if let loaderViewContainer = self.loaderViewContainer, self.subviews.contains(loaderViewContainer) == true{
             return
         }
         
-        self.isUserInteractionEnabled = true
-        self.indicator.stopAnimating()
-        self.indicator.removeFromSuperview()
-        UIView.transition(with: self, duration: 0.5, options: .curveEaseIn, animations: {
-            self.titleLabel?.alpha = 1.0
-            self.imageAlpha = 1.0
-        }) { (finished) in
+        
+        self.isUserInteractionEnabled = userInteraction
+        
+        
+        loaderViewContainer = UIView(frame: CGRect(x: 0,
+                                                y: 0,
+                                                width:self.frame.width,
+                                                height: self.frame.height ))
+        loaderViewContainer.backgroundColor = self.backgroundColor
+        loaderViewContainer.alpha = 0
+        loaderViewContainer.isUserInteractionEnabled = false
+        
+        
+        loaderView.isUserInteractionEnabled = false
+        
+        if let loaderView = loaderView as? IKSpinner{
+            loaderView.lineColor = self.titleLabel!.textColor
+            loaderView.isAnimating = false
+            loaderView.frame = CGRect(x: 0, y: 0, width: self.bounds.size.width, height: self.titleLabel!.frame.height)
+        }else{
+            loaderView.alpha = 0
         }
+
+        loaderView.center = CGPoint(x: self.bounds.size.width/2, y: self.bounds.size.height/2)
+
+        loaderViewContainer.addSubview(loaderView)
+        
+        self.addSubview(self.loaderViewContainer)
+        
+        
+        DispatchQueue.main.async {
+            UIView.transition(with: self, duration: 0.3, options: .curveEaseOut, animations: {
+                
+                self.loaderViewContainer?.alpha = 1.0
+                self.imageAlpha = 0.0
+            }) { (finished) in
+                
+                if let loaderView = self.loaderView as? IKSpinner{
+                    loaderView.fadeIn()
+                }else{
+                    UIView.transition(with: self, duration: 0.3, options: .curveEaseOut, animations: {
+                        self.loaderView.alpha = 1.0
+                    })
+                }
+            }
+        }
+        
+        
+        
+        
+        
+    }
+    
+    open func hideLoader(){
+        guard self.subviews.contains(loaderViewContainer) == true else {
+            return
+        }
+        DispatchQueue.main.async {
+            
+            let afterFadeoutLoader = {
+                self.isUserInteractionEnabled = true
+                self.loaderView.removeFromSuperview()
+                
+                if let loaderView = self.loaderView as? IKSpinner{
+                    loaderView.isAnimating = false
+                }
+                
+                UIView.transition(with: self, duration: 0.3, options: .curveEaseIn, animations: {
+                    self.loaderViewContainer?.alpha = 0.0
+                    self.imageAlpha = 1.0
+                }) { (finished) in
+                    
+                    self.loaderViewContainer.removeFromSuperview()
+                }
+            }
+            
+            if let loaderView = self.loaderView as? IKSpinner{
+                loaderView.fadeOut(0.2, afterFadeoutLoader)
+            }else{
+                UIView.transition(with: self, duration: 0.2, options: .curveEaseIn, animations: {
+                    self.loaderView.alpha = 0.0
+                }) { (finished) in
+                    afterFadeoutLoader()
+                }
+            }
+            
+            
+            
+        }
+        
     }
     
     //MARK: - Interface Builder Methods
@@ -229,6 +301,10 @@ open class PMSuperButton: UIButton {
     
     override open func prepareForInterfaceBuilder() {
     }
+    
+    
+    
+    
 }
 
 extension PMSuperButton: CAAnimationDelegate{
