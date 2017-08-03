@@ -7,7 +7,7 @@
 [![Pod version](https://img.shields.io/cocoapods/v/PMSuperButton.svg?style=flat)](https://cocoapods.org/pods/PMSuperButton)
 [![Carthage Compatible](https://img.shields.io/badge/Carthage-compatible-yellow.svg)](https://github.com/Carthage/Carthage)
 
-PMSuperButton is a powerful UIButton coming from the countryside, but with super powers! 😎
+In this fork I've replaced standard UIActivityIndicator to custom  and configurable loader - UILabel, UIView, etc (default loader - my IKSpinner(https://github.com/ilia3546/IKSpinner))
 
 <p align="center">
   <img src="https://github.com/Codeido/PMSuperButton/blob/master/docs/ripple_button.gif?raw=true" alt="Icon"/>
@@ -32,7 +32,7 @@ PMSuperButton is a powerful UIButton coming from the countryside, but with super
 - [x] Toggle functionality
 - [x] Image View content mode and alpha
 - [x] Touch up inside closure 🤠
-- [x] Loader 🤜🤛
+- [x] **CUSTOM LOADER** 🤜🤛
 - [x] **and much more**
 
 ## How it works
