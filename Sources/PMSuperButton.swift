@@ -254,9 +254,12 @@ open class PMSuperButton: UIButton {
     }
     
     open func hideLoader(){
-        guard self.subviews.contains(loaderViewContainer) == true else {
+        
+        if let loaderViewContainer = self.loaderViewContainer, self.subviews.contains(loaderViewContainer) == false{
             return
         }
+
+    
         DispatchQueue.main.async {
             
             let afterFadeoutLoader = {
